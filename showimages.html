@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Multiple object detection using pre trained model in TensorFlow.js</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Jason Mayes">
+</head>
+
+<body id="body">
+
+    <h2>How to use</h2>
+    <p>first, enable notifications.<br>
+        second, you need to sign in.<br>
+        Lastly, wait for the magic to happen.
+    </p>
+
+    <h2>Show Images from Firestore Database</h2>
+
+    <p>
+        <input type="email" placeholder="email here" id="email"><br>
+        <input type="password" placeholder="password here" id="password"><br>
+        <button onclick="signIn()" id="signIn" class="btn btn-action">SignIn</button>
+    </p>
+
+
+
+
+    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
+    <script>
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+            apiKey: "AIzaSyAqu-usFbiECu0VqE_z-4GVlkYGfY9PYIo",
+            authDomain: "person-detection-9ba5d.firebaseapp.com",
+            projectId: "person-detection-9ba5d",
+            storageBucket: "person-detection-9ba5d.appspot.com",
+            messagingSenderId: "865499889032",
+            appId: "1:865499889032:web:e4515efb6f29dd6d1d8e3d"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        console.log("done firebase")
+    </script>
+
+
+    <script>
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+        const auth = firebase.auth();
+        async function logToFirestore() {
+            console.log("send to firebase initited")
+            const uid = auth.currentUser.uid;
+
+            db.collection("users").doc(uid).collection("events").get().then((querySnapshot) => {
+                querySnapshot.forEach((doc) => {
+                    console.log(doc.id);
+                    doc_id = doc.id
+                    showimages(uid, doc_id)
+
+                });
+            });
+        }
+
+
+        function signIn() {
+            var email = document.getElementById("email");
+            var password = document.getElementById("password");
+            const promise = auth.signInWithEmailAndPassword(email.value, password.value);
+            promise.catch(e => alert(e.message));
+            console.log("Signed In Successfully")
+            firebase.auth().onAuthStateChanged((user) => {
+                checkReady();
+                logToFirestore();
+            });
+        }
+
+        // Check if the user is logged in (and wait if they're not)
+        function checkReady() {
+            if (firebase.auth().currentUser) {
+                console.log("user logged in. Ready to go");
+            }
+        }
+
+        function showimages(uid, doc_id) {
+            // Create a reference to the file we want to download
+            var starsRef = storage.ref().child('users/' + uid + '/' + doc_id + '.png');
+
+            // Get the download URL
+            starsRef.getDownloadURL()
+                .then((url) => {
+
+                    // Or inserted into an <img> element
+                    var img = document.createElement('img');
+                    img.setAttribute('src', url);
+                    document.getElementById('body').appendChild(img);
+                })
+
+                .catch((error) => {
+                    // A full list of error codes is available at
+                    // https://firebase.google.com/docs/storage/web/handle-errors
+                    switch (error.code) {
+                        case 'storage/object-not-found':
+                            // File doesn't exist
+                            break;
+                        case 'storage/unauthorized':
+                            // User doesn't have permission to access the object
+                            break;
+                        case 'storage/canceled':
+                            // User canceled the upload
+                            break;
+
+                        // ...
+
+                        case 'storage/unknown':
+                            // Unknown error occurred, inspect the server response
+                            break;
+                    }
+                });
+        }
+
+    </script>
+
+
+</body>
+
+</html>
