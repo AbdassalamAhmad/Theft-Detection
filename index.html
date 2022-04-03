@@ -12,41 +12,41 @@
 </head>
 
 <body>
-  <h1>Theft-Detection using COCO-SSD pre-trained model from Tensorflow.js</h1>
+  <h1>Theft-Detection using COCO-SSD pre-trained model from TensorFlow.js</h1>
 
 
   <section id="demos" class="invisible">
     <h2>Demo</h2>
 
-
-
     <h2>Security Webcam</h2>
-    <h2>How to use</h2>
-    <p>
+    <h3>How to use</h3>
     <ol>
       <li>wait for the model to load before trying the demos below
         at which point they will become visible when ready to use.</li>
-        <li>sign up with <b>a temp-mail and random password</b> if you are not registered, then sign in to be able to use the model<br>
-        Note that the detection runs on client device but for the alert to happen it needs to be sent to the cloud</li>
-  
+      <li>sign up with <b>a temp-mail and random password</b> if you are not registered, then sign in to be able to use
+        the model.<br>
+        <b>Note: </b>The detection runs on client device but for the alert to happen it needs to be sent to the cloud.</li>
+
       <li>When you are ready click "enable webcam" below and accept access to the webcam
-        when the browser asks (check the top left of your window)</li>
-  
-      <li> once you enable the webcam, the model will detect every person and capture photos of him every 2 seconds.</li>
-  
+        when the browser asks (check the top left of your window).</li>
+
+      <li> once you enable the webcam, the model will detect every person and capture photos of him every 2 seconds.
+      </li>
+
       <li>The photos are sent to firebase storage and then will be sent to
         <a href="https://abdassalamahmad.github.io/Theft-Detection/showimages.html">this page</a>
-        to see all photos taken.</li>
-  
-      <li>Ideally you should get a notification for every new detection but currently it's not available (To-Do)</li>
-      </p>
+        to see all photos taken.
+      </li>
+
+      <li>Ideally you should get a notification for every new detection but currently it's not available (To-Do).</li>
     </ol>
 
-
+    <p>
     <div id="liveView" class="videoView">
       <button id="webcamButton">Enable Webcam</button>
       <video id="webcam" autoplay></video>
     </div>
+    </p>
   </section>
 
 
@@ -56,7 +56,7 @@
     <button onclick="signUp()" id="signUp" class="btn btn-secondary">SignUp</button>
   </p>
 
-  
+
   <!-- Import TensorFlow.js library -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.11.0/dist/tf.min.js" type="text/javascript"></script>
 
@@ -89,4 +89,5 @@
   <!-- Import the page's JavaScript to do some stuff -->
   <script src="https://abdassalamahmad.github.io/Theft-Detection/script.js"></script>
 </body>
+
 </html>
