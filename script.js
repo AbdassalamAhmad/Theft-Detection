@@ -1,38 +1,9 @@
-/**
- * @license
- * Copyright 2018 Google LLC. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * =============================================================================
- */
-
-/********************************************************************
- * Demo created by Jason Mayes 2020.
- *
- * Got questions? Reach out to me on social:
- * Twitter: @jason_mayes
- * LinkedIn: https://www.linkedin.com/in/creativetech
- ********************************************************************/
-
-//const VIDEO = document.getElementById('webcam');
 const CANVAS = document.createElement('canvas');
 const CTX = CANVAS.getContext('2d');
 const demosSection = document.getElementById('demos');
 const db = firebase.firestore();
 const storage = firebase.storage();
 var model = undefined;
-
-
-
 const auth = firebase.auth();
 
 //signup function
@@ -56,9 +27,6 @@ function signIn() {
 }
 
 
-
-
-
 // Before we do anything, we need to load the model and log in.
 function checkReady() {
     if (firebase.auth().currentUser) {
@@ -73,8 +41,6 @@ firebase.auth().onAuthStateChanged((user) => {
 });
 
 
-
-
 // Before we can use COCO-SSD class we must wait for it to finish
 // loading. Machine Learning models can be large and take a moment to
 // get everything needed to run.
@@ -87,72 +53,8 @@ cocoSsd.load().then(function (loadedModel) {
 
 
 /********************************************************************
-// Demo 1: Grab a bunch of images from the page and classify them
-// upon click.
-********************************************************************/
-
-// In this demo, we have put all our clickable images in divs with the 
-// CSS class 'classifyOnClick'. Lets get all the elements that have
-// this class.
-const imageContainers = document.getElementsByClassName('classifyOnClick');
-
-// Now let's go through all of these and add a click event listener.
-for (let i = 0; i < imageContainers.length; i++) {
-    // Add event listener to the child element whichis the img element.
-    imageContainers[i].children[0].addEventListener('click', handleClick);
-}
-
-// When an image is clicked, let's classify it and display results!
-function handleClick(event) {
-    if (!model) {
-        console.log('Wait for model to load before clicking!');
-        return;
-    }
-
-    // We can call model.classify as many times as we like with
-    // different image data each time. This returns a promise
-    // which we wait to complete and then call a function to
-    // print out the results of the prediction.
-    model.detect(event.target).then(function (predictions) {
-        // Lets write the predictions to a new paragraph element and
-        // add it to the DOM.
-        console.log(predictions);
-
-        for (let n = 0; n < predictions.length; n++) {
-            // Description text
-            const p = document.createElement('p');
-            p.innerText = predictions[n].class + ' - with '
-                + Math.round(parseFloat(predictions[n].score) * 100)
-                + '% confidence.';
-            // Positioned at the top left of the bounding box.
-            // Height is whatever the text takes up.
-            // Width subtracts text padding in CSS so fits perfectly.
-            p.style = 'left: ' + predictions[n].bbox[0] + 'px;' +
-                'top: ' + predictions[n].bbox[1] + 'px; ' +
-                'width: ' + (predictions[n].bbox[2] - 10) + 'px;';
-
-            const highlighter = document.createElement('div');
-            highlighter.setAttribute('class', 'highlighter');
-            highlighter.style = 'left: ' + predictions[n].bbox[0] + 'px;' +
-                'top: ' + predictions[n].bbox[1] + 'px;' +
-                'width: ' + predictions[n].bbox[2] + 'px;' +
-                'height: ' + predictions[n].bbox[3] + 'px;';
-
-            event.target.parentNode.appendChild(highlighter);
-            event.target.parentNode.appendChild(p);
-
-
-
-        }
-    });
-}
-
-
-
-/********************************************************************
-// Demo 2: Continuously grab image from webcam stream and classify it.
+// Demo : Continuously grab image from webcam stream and classify it.
 // Note: You must access the demo on https for this to work:
-// https://tensorflow-js-image-classification.glitch.me/
 ********************************************************************/
 
 const MIN_ALERT_COOLDOWN_TIME = 2;
@@ -160,15 +62,16 @@ var foundMonitoredObjects = [];
 const video = document.getElementById('webcam');
 const liveView = document.getElementById('liveView');
 var sendAlerts = true;
+// Keep a reference of all the child elements we create
+// so we can remove them easilly on each render.
+var children = [];
+
+
 // Check if webcam access is supported.
 function hasGetUserMedia() {
     return !!(navigator.mediaDevices &&
         navigator.mediaDevices.getUserMedia);
 }
-
-// Keep a reference of all the child elements we create
-// so we can remove them easilly on each render.
-var children = [];
 
 
 // If webcam supported, add event listener to button for when user
@@ -207,7 +110,11 @@ function enableCam(event) {
 
 }
 
+/********************************************************************
 
+----------------------LOGIC FUNCTIONS--------------------------
+
+********************************************************************/
 // Prediction loop!
 function predictWebcam() {
     // Now let's start classifying the stream.
@@ -243,6 +150,8 @@ function predictWebcam() {
         window.requestAnimationFrame(predictWebcam);
     });
 }
+
+
 function recalculateVideoScale() {
     ratioY = video.clientHeight / video.videoHeight;
     ratioX = video.clientWidth / video.videoWidth;
@@ -308,9 +217,6 @@ async function logToFirestore(blob, detectionEvent) {
 }
 
 
-
-
-
 function sendAlert(foundMonitoredObjects) {
     var detectionEvent = {};
     // Epoch of detection time.
@@ -343,6 +249,7 @@ function sendAlert(foundMonitoredObjects) {
         })
     }, 'image/png');
 }
+
 
 function cooldown() {
     sendAlerts = true;
