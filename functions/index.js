@@ -1,7 +1,72 @@
 const functions = require('firebase-functions');
 // Import and initialize the Firebase Admin SDK.
 const admin = require('firebase-admin');
+import {
+    getAuth
+  } from 'firebase/auth';
+import {
+    getFirestore,
+    collection,
+    addDoc,
+    query,
+    orderBy,
+    limit,
+    onSnapshot,
+    setDoc,
+    updateDoc,
+    doc,
+    serverTimestamp,
+  } from 'firebase/firestore';
+  
+
+import {
+    getMessaging,
+    getToken,
+    onMessage
+} from 'firebase/messaging';
 admin.initializeApp();
+
+// Saves the messaging device token to Cloud Firestore.
+async function saveMessagingDeviceToken() {
+    try {
+        const currentToken = await getToken(getMessaging());
+        if (currentToken) {
+            console.log('Got FCM device token:', currentToken);
+            // Saving the Device Token to Cloud Firestore.
+            const tokenRef = doc(getFirestore(), 'users', getAuth().currentUser.uid, currentToken);
+            await setDoc(tokenRef, { uid: getAuth().currentUser.uid });
+
+            // This will fire when a message is received while the app is in the foreground.
+            // When the app is in the background, firebase-messaging-sw.js will receive the message instead.
+            onMessage(getMessaging(), (message) => {
+                console.log(
+                    'New foreground notification from Firebase Messaging!',
+                    message.notification
+                );
+            });
+        } else {
+            // Need to request permissions to show notifications.
+            requestNotificationsPermissions();
+        }
+    } catch (error) {
+        console.error('Unable to get messaging token.', error);
+    };
+}
+
+
+// Requests permissions to show notifications.
+async function requestNotificationsPermissions() {
+    console.log('Requesting notifications permission...');
+    const permission = await Notification.requestPermission();
+
+    if (permission === 'granted') {
+        console.log('Notification permission granted.');
+        // Notification permission granted.
+        await saveMessagingDeviceToken();
+    } else {
+        console.log('Unable to get permission to notify.');
+    }
+}
 
 
 // Sends a notifications to the user when a new detection happened.
